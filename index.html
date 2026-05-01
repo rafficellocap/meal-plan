@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitPlan — 92kg → Goal</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e0e;--surface:#161616;--surface2:#1e1e1e;--surface3:#252525;
+  --border:rgba(255,255,255,0.08);--text:#f0ede8;--text2:#888;--text3:#555;
+  --accent:#e8d5a0;--accent2:#c4a84f;
+  --green:#5fcf80;--green-dim:rgba(95,207,128,0.12);
+  --red:#f06060;--red-dim:rgba(240,96,96,0.12);
+  --blue:#60a8f0;--blue-dim:rgba(96,168,240,0.12);
+  --orange:#f09060;--orange-dim:rgba(240,144,96,0.12);
+  --purple:#a060f0;--purple-dim:rgba(160,96,240,0.12);
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+h1,h2,h3,h4{font-family:'Barlow Condensed',sans-serif;letter-spacing:0.02em}
+
+/* SHELL */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{flex:1;overflow-x:hidden}
+
+/* SIDEBAR */
+.logo{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:0.05em;color:var(--accent);text-transform:uppercase}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:2px;letter-spacing:0.08em;text-transform:uppercase}
+.nav{padding:12px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.06em}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(232,213,160,0.06)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.stats-block{padding:16px 20px;border-top:1px solid var(--border);background:var(--surface2)}
+.stats-block-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px}
+.mini-stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mini-stat-label{font-size:11px;color:var(--text2)}
+.mini-stat-value{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--accent)}
+
+/* PAGE HEADER */
+.page-header{padding:32px 32px 0;border-bottom:1px solid var(--border);margin-bottom:28px}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;letter-spacing:0.03em;text-transform:uppercase;color:var(--accent);line-height:1}
+.page-subtitle{font-size:14px;color:var(--text2);margin-top:6px;margin-bottom:20px}
+
+/* TABS */
+.tabs{display:flex;gap:0}
+.tab{padding:10px 20px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* CONTENT */
+.content{padding:0 32px 40px}
+.section{display:none}
+.section.active{display:block}
+
+/* GRIDS */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.big-number{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;line-height:1;color:var(--accent)}
+.big-unit{font-size:14px;color:var(--text2);margin-left:4px}
+.card-desc{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* MACRO BAR */
+.macro-row{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.macro-label{font-size:12px;color:var(--text2);width:70px;flex-shrink:0}
+.macro-bar-wrap{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.macro-bar{height:100%;border-radius:3px}
+.macro-value{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;width:65px;text-align:right;color:var(--text)}
+
+/* WEEK GRID */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:24px}
+.day-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 10px;text-align:center;min-height:120px;display:flex;flex-direction:column;gap:6px}
+.day-name{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.day-pill{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500;line-height:1.4}
+.pill-run{background:var(--green-dim);color:var(--green)}
+.pill-strength{background:var(--blue-dim);color:var(--blue)}
+.pill-row{background:var(--orange-dim);color:var(--orange)}
+.pill-aikido{background:var(--purple-dim);color:var(--purple)}
+.pill-rest{background:rgba(255,255,255,0.04);color:var(--text3)}
+.day-note{font-size:10px;color:var(--text3);line-height:1.4;margin-top:auto}
+
+/* SECTION HEADING */
+.section-heading{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* WORKOUT BLOCK */
+.workout-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+.workout-header{padding:14px 18px;background:var(--surface2);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.workout-day-label{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase}
+.workout-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:0.06em;text-transform:uppercase}
+.workout-table{width:100%;border-collapse:collapse}
+.workout-table th{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:10px 18px;text-align:left;border-bottom:1px solid var(--border)}
+.workout-table td{padding:10px 18px;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:top}
+.workout-table tr:last-child td{border-bottom:none}
+.workout-table td:first-child{color:var(--text);font-weight:500}
+.sets-badge{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--accent);font-weight:600}
+
+/* RUN PLAN TABLE */
+.run-table{width:100%;border-collapse:collapse}
+.run-table th{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)}
+.run-table td{padding:10px 14px;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:top}
+.run-table tr:last-child td{border-bottom:none}
+.run-table tr:hover td{background:rgba(255,255,255,0.02)}
+.run-table td:first-child{color:var(--text);font-weight:600;font-family:'Barlow Condensed',sans-serif;font-size:15px}
+.badge-build{background:var(--green-dim);color:var(--green);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.06em}
+.badge-recovery{background:var(--blue-dim);color:var(--blue);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.06em}
+.badge-peak{background:rgba(240,96,96,0.15);color:var(--red);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.06em}
+.badge-taper{background:var(--orange-dim);color:var(--orange);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.06em}
+.badge-race{background:rgba(232,213,160,0.15);color:var(--accent);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.06em}
+.run-km{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--accent)}
+
+/* NUTRITION */
+.meal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px}
+.meal-time{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px}
+.meal-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px}
+.meal-desc{font-size:13px;color:var(--text2);line-height:1.6}
+.meal-macros{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}
+.meal-macro{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px}
+.mm-kcal{background:rgba(232,213,160,0.12);color:var(--accent)}
+.mm-pro{background:var(--blue-dim);color:var(--blue)}
+.mm-carb{background:var(--green-dim);color:var(--green)}
+.mm-fat{background:var(--orange-dim);color:var(--orange)}
+
+/* AI MEAL IDEAS */
+.mi-select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r);padding:9px 12px;font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;appearance:auto}
+.mi-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r);padding:9px 12px;font-family:'Barlow',sans-serif;font-size:13px}
+.mi-input:focus,.mi-select:focus{outline:none;border-color:var(--accent2)}
+.mi-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.mi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.btn-generate{width:100%;padding:12px 20px;background:var(--accent2);color:#0e0e0e;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.15s}
+.btn-generate:hover{background:var(--accent)}
+.btn-generate:disabled{opacity:0.5;cursor:not-allowed}
+.mi-stat-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.mi-stat{flex:1;min-width:70px;background:var(--surface2);border-radius:6px;padding:10px;text-align:center}
+.mi-stat-num{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700}
+.mi-stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-top:2px}
+.mi-why{background:var(--green-dim);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:16px;line-height:1.5}
+.mi-tip{background:rgba(232,213,160,0.06);border:1px solid rgba(232,213,160,0.15);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--accent2);margin-top:14px;line-height:1.5}
+.mi-col2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.mi-ing-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.mi-ing-amt{min-width:55px;color:var(--accent2);font-weight:600;flex-shrink:0}
+.mi-step-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;line-height:1.5}
+.mi-step-num{min-width:20px;height:20px;border-radius:50%;background:var(--surface2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;color:var(--accent2)}
+.mi-sub{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.mi-saved-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;gap:8px;cursor:pointer}
+.mi-saved-row:hover{color:var(--accent)}
+.mi-del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0 4px}
+
+/* FOOD LIST */
+.food-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.food-list{list-style:none}
+.food-list li{padding:7px 0;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:8px}
+.food-list li::before{content:"▸";color:var(--accent2);font-size:10px;flex-shrink:0}
+
+/* TIPS */
+.tip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.tip-icon{font-size:24px;margin-bottom:8px}
+.tip-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent);margin-bottom:6px}
+.tip-text{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* PROGRESS */
+.weight-input-row{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.weight-input-row input{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r);padding:10px 14px;font-size:14px;font-family:'Barlow',sans-serif}
+.weight-input-row input:focus{outline:none;border-color:var(--accent2)}
+.btn{padding:10px 20px;background:var(--accent2);color:#0e0e0e;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.15s}
+.btn:hover{background:var(--accent)}
+.btn-sm{padding:6px 14px;font-size:12px}
+canvas{border-radius:var(--r)}
+.weight-log{list-style:none}
+.weight-log li{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.wdate{color:var(--text2)}
+.wval{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600}
+.wdiff-pos{color:var(--red);font-size:11px}
+.wdiff-neg{color:var(--green);font-size:11px}
+.wdiff-zero{color:var(--text3);font-size:11px}
+.chart-wrap{position:relative;height:200px;margin-bottom:24px}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .week-grid{grid-template-columns:repeat(4,1fr)}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .tip-grid{grid-template-columns:1fr 1fr}
+  .mi-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .content{padding:0 16px 32px}
+  .page-header{padding:20px 16px 0}
+  .grid-2,.grid-3,.food-cols{grid-template-columns:1fr}
+  .week-grid{grid-template-columns:repeat(2,1fr)}
+  .tip-grid{grid-template-columns:1fr}
+  .mi-col2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-name">FitPlan</div>
+    <div class="logo-sub">92 kg → Goal</div>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" onclick="showSection('overview',this)"><span class="nav-icon">📊</span>Overview</div>
+    <div class="nav-item" onclick="showSection('schedule',this)"><span class="nav-icon">📅</span>Schedule</div>
+    <div class="nav-item" onclick="showSection('running',this)"><span class="nav-icon">🏃</span>Running Plan</div>
+    <div class="nav-item" onclick="showSection('strength',this)"><span class="nav-icon">💪</span>Strength</div>
+    <div class="nav-item" onclick="showSection('nutrition',this)"><span class="nav-icon">🥗</span>Nutrition</div>
+    <div class="nav-item" onclick="showSection('progress',this)"><span class="nav-icon">📈</span>Progress</div>
+  </div>
+  <div class="stats-block">
+    <div class="stats-block-label">Your Numbers</div>
+    <div class="mini-stat"><span class="mini-stat-label">Height</span><span class="mini-stat-value">1.80 m</span></div>
+    <div class="mini-stat"><span class="mini-stat-label">Start weight</span><span class="mini-stat-value">92 kg</span></div>
+    <div class="mini-stat"><span class="mini-stat-label">Target kcal</span><span class="mini-stat-value">2,450</span></div>
+    <div class="mini-stat"><span class="mini-stat-label">Protein goal</span><span class="mini-stat-value">160 g</span></div>
+    <div class="mini-stat" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span class="mini-stat-label">Race day</span><span class="mini-stat-value">Jul 12</span></div>
+    <div class="mini-stat"><span class="mini-stat-label">Days to go</span><span class="mini-stat-value" id="sb-countdown">—</span></div>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+<!-- ════ OVERVIEW ════ -->
+<div id="sec-overview" class="section active">
+  <div class="page-header">
+    <div class="page-title">Overview</div>
+    <div class="page-subtitle">Your complete body recomposition plan — lose fat, build muscle, run a half marathon.</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('overview','main',this)">Dashboard</div>
+      <div class="tab" onclick="switchTab('overview','macro',this)">Macros</div>
+    </div>
+  </div>
+  <div class="content">
+    <div id="overview-main" class="tab-pane active">
+      <div class="grid-4">
+        <div class="card"><div class="card-title">Daily Calories</div><div class="big-number">2,450<span class="big-unit">kcal</span></div><div class="card-desc">~350 below maintenance for steady fat loss</div></div>
+        <div class="card"><div class="card-title">Protein Target</div><div class="big-number">160<span class="big-unit">g</span></div><div class="card-desc">1.75g/kg — preserves muscle while cutting</div></div>
+        <div class="card"><div class="card-title">Training Days/Week</div><div class="big-number">6<span class="big-unit">days</span></div><div class="card-desc">Aikido + 2× strength + 3× run / row</div></div>
+        <div class="card"><div class="card-title">Race Countdown</div><div class="big-number" id="ov-countdown">—</div><div class="card-desc">July 12, 2026 — half marathon</div></div>
+      </div>
+      <div class="section-heading">Weekly Schedule at a Glance</div>
+      <div class="week-grid">
+        <div class="day-card"><div class="day-name">Mon</div><span class="day-pill pill-aikido">Aikido</span><div class="day-note">Technique + mobility</div></div>
+        <div class="day-card"><div class="day-name">Tue</div><span class="day-pill pill-row">WaterRower</span><span class="day-pill pill-strength">Strength A</span><div class="day-note">Row 20 min + Push/Core</div></div>
+        <div class="day-card"><div class="day-name">Wed</div><span class="day-pill pill-run">Run</span><div class="day-note">Speed / Tempo</div></div>
+        <div class="day-card"><div class="day-name">Thu</div><span class="day-pill pill-strength">Strength B</span><div class="day-note">Pull / Core</div></div>
+        <div class="day-card"><div class="day-name">Fri</div><span class="day-pill pill-rest">Rest</span><div class="day-note">Walk / stretch only</div></div>
+        <div class="day-card"><div class="day-name">Sat</div><span class="day-pill pill-run">Easy Run</span><div class="day-note">Recovery pace</div></div>
+        <div class="day-card"><div class="day-name">Sun</div><span class="day-pill pill-run">Long Run</span><div class="day-note">Endurance</div></div>
+      </div>
+      <div class="tip-grid">
+        <div class="tip-card"><div class="tip-icon">🛌</div><div class="tip-title">Sleep First</div><div class="tip-text">7–8 hours is non-negotiable. Growth hormone peaks during deep sleep — this is when fat is burned and muscle is built.</div></div>
+        <div class="tip-card"><div class="tip-icon">📉</div><div class="tip-title">Fat Loss Reality</div><div class="tip-text">You can't spot-reduce. A sustained caloric deficit + high protein + progressive strength will reduce chest and belly fat.</div></div>
+        <div class="tip-card"><div class="tip-icon">⬆️</div><div class="tip-title">Progressive Overload</div><div class="tip-text">Add a small amount of weight or an extra rep each week. This signal is what your body needs to build muscle while in a deficit.</div></div>
+      </div>
+    </div>
+    <div id="overview-macro" class="tab-pane">
+      <div class="section-heading">Daily Macro Targets</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Calorie Breakdown</div>
+        <div style="margin-top:16px">
+          <div class="macro-row"><div class="macro-label">Protein</div><div class="macro-bar-wrap"><div class="macro-bar" style="width:26%;background:var(--blue)"></div></div><div class="macro-value" style="color:var(--blue)">160g · 640 kcal</div></div>
+          <div class="macro-row"><div class="macro-label">Carbs</div><div class="macro-bar-wrap"><div class="macro-bar" style="width:47%;background:var(--green)"></div></div><div class="macro-value" style="color:var(--green)">240g · 960 kcal</div></div>
+          <div class="macro-row"><div class="macro-label">Fat</div><div class="macro-bar-wrap"><div class="macro-bar" style="width:27%;background:var(--orange)"></div></div><div class="macro-value" style="color:var(--orange)">94g · 846 kcal</div></div>
+        </div>
+        <div style="margin-top:16px;font-size:12px;color:var(--text3);border-top:1px solid var(--border);padding-top:12px">Total: ~2,446 kcal/day · On long run days (Sunday) add 200–300 kcal of carbs</div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-title">Run Day Adjustment</div><div style="font-size:13px;color:var(--text2);line-height:1.7">Add <strong style="color:var(--accent)">200–300 kcal</strong> of complex carbs before runs. Don't cut on run days.</div></div>
+        <div class="card"><div class="card-title">Rest Day Adjustment</div><div style="font-size:13px;color:var(--text2);line-height:1.7">Reduce carbs slightly to <strong style="color:var(--accent)">180–200g</strong> on Friday. Keep protein high.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SCHEDULE ════ -->
+<div id="sec-schedule" class="section">
+  <div class="page-header">
+    <div class="page-title">Weekly Schedule</div>
+    <div class="page-subtitle">Full breakdown of each training day.</div>
+    <div style="height:16px"></div>
+  </div>
+  <div class="content">
+    <div class="workout-block">
+      <div class="workout-header"><div class="workout-day-label" style="color:var(--purple)">Monday — Aikido</div><span class="workout-tag" style="background:var(--purple-dim);color:var(--purple)">Technique</span></div>
+      <table class="workout-table"><tr><th>Session</th><th>Duration</th><th>Notes</th></tr>
+      <tr><td>Aikido class</td><td>60–90 min</td><td>Technique, throws, ukemi, breathing. Treat as mobility + active recovery.</td></tr></table>
+    </div>
+    <div class="workout-block">
+      <div class="workout-header"><div class="workout-day-label" style="color:var(--orange)">Tuesday — Row + Strength A</div><span class="workout-tag" style="background:var(--orange-dim);color:var(--orange)">Push / Core</span></div>
+      <table class="workout-table"><tr><th>Order</th><th>Session</th><th>Duration / Notes</th></tr>
+      <tr><td>1st</td><td>WaterRower</td><td>20–25 min at moderate pace. Builds cardio base without stressing running muscles.</td></tr>
+      <tr><td>2nd</td><td>Strength A — Push + Core</td><td>~35 min. Full program in the Strength section.</td></tr></table>
+    </div>
+    <div class="workout-block">
+      <div class="workout-header"><div class="workout-day-label" style="color:var(--green)">Wednesday — Run</div><span class="workout-tag" style="background:var(--green-dim);color:var(--green)">Speed / Tempo</span></div>
+      <table class="workout-table"><tr><th>Session</th><th>Pace</th><th>Notes</th></tr>
+      <tr><td>Midweek run (per plan)</td><td>Tempo: 6:00–6:15/km · Easy: 7:00–7:30/km</td><td>Quality run day — intervals or tempo. Eat carbs 1–2 hrs before. See Running Plan tab for weekly targets.</td></tr></table>
+    </div>
+    <div class="workout-block">
+      <div class="workout-header"><div class="workout-day-label" style="color:var(--blue)">Thursday — Strength B</div><span class="workout-tag" style="background:var(--blue-dim);color:var(--blue)">Pull / Core</span></div>
+      <table class="workout-table"><tr><th>Session</th><th>Duration</th><th>Notes</th></tr>
+      <tr><td>Strength B — Pull + Core</td><td>30–40 min</td><td>Back, biceps, rear delts. Building back strength counters the chest-dominant appearance.</td></tr></table>
+    </div>
+    <div class="workout-block">
+      <div class="workout-header"><div class="workout-day-label" style="color:var(--text3)">Friday — Rest</div><span class="workout-tag" style="background:rgba(255,255,255,0.05);color:var(--text3)">Recovery</span></div>
+      <table class="workout-table"><tr><th>Activity</th><th>Duration</th><th>Notes</th></tr>
+      <tr><td>Walk / light stretch only</td><td>20–30 min optional</td><td>Your body builds muscle and burns fat during recovery, not training. Sleep 8 hrs tonight before Saturday's run.</td></tr></table>
+    </div>
+    <div class="workout-block">
+      <div class="workout-header"><div class="workout-day-label" style="color:var(--green)">Saturday — Easy Run</div><span class="workout-tag" style="background:var(--green-dim);color:var(--green)">Recovery Pace</span></div>
+      <table class="workout-table"><tr><th>Session</th><th>Pace</th><th>Notes</th></tr>
+      <tr><td>Easy / recovery run (per plan)</td><td>7:15–7:45/km</td><td>Conversational pace — you should be able to hold full sentences. Primes legs for Sunday.</td></tr></table>
+    </div>
+    <div class="workout-block">
+      <div class="workout-header"><div class="workout-day-label" style="color:var(--green)">Sunday — Long Run</div><span class="workout-tag" style="background:var(--green-dim);color:var(--green)">Endurance</span></div>
+      <table class="workout-table"><tr><th>Session</th><th>Pace</th><th>Notes</th></tr>
+      <tr><td>Long run (per plan)</td><td>6:45–7:15/km</td><td>Most important run of the week. Eat well the night before. 400–500 kcal carbs 2 hrs before. Run by feel, not pace.</td></tr></table>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RUNNING PLAN ════ -->
+<div id="sec-running" class="section">
+  <div class="page-header">
+    <div class="page-title">Running Plan</div>
+    <div class="page-subtitle">12-week half marathon plan · Race day: July 12, 2026 · Wed + Sat + Sun</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('running','table',this)">Full Schedule</div>
+      <div class="tab" onclick="switchTab('running','paces',this)">Pace Guide</div>
+    </div>
+  </div>
+  <div class="content">
+    <div id="running-table" class="tab-pane active">
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">
+          <div><div class="card-title">Total weeks</div><div style="font-family:'Barlow Condensed';font-size:28px;font-weight:700;color:var(--accent)">12</div></div>
+          <div><div class="card-title">Runs / week</div><div style="font-family:'Barlow Condensed';font-size:28px;font-weight:700;color:var(--accent)">3</div></div>
+          <div><div class="card-title">Peak week km</div><div style="font-family:'Barlow Condensed';font-size:28px;font-weight:700;color:var(--accent)">40</div></div>
+          <div><div class="card-title">Race distance</div><div style="font-family:'Barlow Condensed';font-size:28px;font-weight:700;color:var(--accent)">21.1</div></div>
+        </div>
+      </div>
+      <div class="workout-block">
+        <table class="run-table">
+          <thead><tr>
+            <th>Week</th><th>Dates</th><th>Type</th>
+            <th>Wed (midweek)</th><th>Sat (easy)</th><th>Sun (long)</th><th>Total</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Apr 28</td><td><span class="badge-build">Build</span></td><td><span class="run-km">6 km</span> Easy</td><td><span class="run-km">6 km</span> Easy</td><td><span class="run-km">10 km</span> Easy</td><td><span class="run-km">22 km</span></td></tr>
+            <tr><td>2</td><td>May 5</td><td><span class="badge-build">Build</span></td><td><span class="run-km">7 km</span> Tempo 4km</td><td><span class="run-km">7 km</span> Easy</td><td><span class="run-km">12 km</span> Easy</td><td><span class="run-km">26 km</span></td></tr>
+            <tr><td>3</td><td>May 12</td><td><span class="badge-build">Build</span></td><td><span class="run-km">8 km</span> Intervals</td><td><span class="run-km">8 km</span> Easy</td><td><span class="run-km">14 km</span> Easy</td><td><span class="run-km">30 km</span></td></tr>
+            <tr><td>4</td><td>May 19</td><td><span class="badge-recovery">Recovery</span></td><td><span class="run-km">6 km</span> Easy</td><td><span class="run-km">6 km</span> Easy</td><td><span class="run-km">10 km</span> Easy</td><td><span class="run-km">22 km</span></td></tr>
+            <tr><td>5</td><td>May 26</td><td><span class="badge-build">Build</span></td><td><span class="run-km">8 km</span> Tempo 5km</td><td><span class="run-km">8 km</span> Easy</td><td><span class="run-km">16 km</span> Easy</td><td><span class="run-km">32 km</span></td></tr>
+            <tr><td>6</td><td>Jun 2</td><td><span class="badge-build">Build</span></td><td><span class="run-km">9 km</span> Intervals</td><td><span class="run-km">8 km</span> Easy</td><td><span class="run-km">18 km</span> Easy</td><td><span class="run-km">35 km</span></td></tr>
+            <tr><td>7</td><td>Jun 9</td><td><span class="badge-build">Build</span></td><td><span class="run-km">10 km</span> Tempo 6km</td><td><span class="run-km">8 km</span> Easy</td><td><span class="run-km">19 km</span> Easy</td><td><span class="run-km">37 km</span></td></tr>
+            <tr><td>8</td><td>Jun 16</td><td><span class="badge-recovery">Recovery</span></td><td><span class="run-km">7 km</span> Easy</td><td><span class="run-km">6 km</span> Easy</td><td><span class="run-km">13 km</span> Easy</td><td><span class="run-km">26 km</span></td></tr>
+            <tr><td>9</td><td>Jun 23</td><td><span class="badge-peak">Peak</span></td><td><span class="run-km">10 km</span> Tempo 7km</td><td><span class="run-km">10 km</span> Easy</td><td><span class="run-km">20 km</span> Easy</td><td><span class="run-km">40 km</span></td></tr>
+            <tr><td>10</td><td>Jun 30</td><td><span class="badge-taper">Taper</span></td><td><span class="run-km">8 km</span> Tempo 4km</td><td><span class="run-km">7 km</span> Easy</td><td><span class="run-km">16 km</span> Easy</td><td><span class="run-km">31 km</span></td></tr>
+            <tr><td>11</td><td>Jul 7</td><td><span class="badge-taper">Taper</span></td><td><span class="run-km">6 km</span> Easy</td><td><span class="run-km">5 km</span> Easy</td><td><span class="run-km">10 km</span> Easy</td><td><span class="run-km">21 km</span></td></tr>
+            <tr><td>12</td><td>Jul 12</td><td><span class="badge-race">Race</span></td><td>—</td><td>—</td><td><span class="run-km">21.1 km</span> 🏅 RACE</td><td><span class="run-km">21.1 km</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="background:rgba(232,213,160,0.06);border:1px solid rgba(232,213,160,0.15);border-radius:var(--r);padding:14px 18px;font-size:13px;color:var(--text2);line-height:1.8;margin-top:8px">
+        <strong style="color:var(--accent)">Build weeks:</strong> Gradually increase volume. <strong style="color:var(--accent)">Recovery weeks:</strong> Drop back ~30% — this is where fitness is consolidated. <strong style="color:var(--accent)">Peak week:</strong> Highest load, then trust the taper. <strong style="color:var(--accent)">Taper:</strong> Reduce volume, keep intensity. Arrive fresh.
+      </div>
+    </div>
+    <div id="running-paces" class="tab-pane">
+      <div class="section-heading">Pace Guide</div>
+      <div class="workout-block">
+        <table class="workout-table">
+          <tr><th>Run Type</th><th>Pace (min/km)</th><th>Feel</th><th>When</th></tr>
+          <tr><td>Easy / Recovery</td><td><span class="sets-badge">7:00–7:45</span></td><td>Conversational — full sentences, nose breathing possible</td><td>Sat, Sun long runs, recovery weeks</td></tr>
+          <tr><td>Tempo</td><td><span class="sets-badge">6:00–6:15</span></td><td>Comfortably hard — 2–3 word sentences only</td><td>Wed midweek runs with tempo blocks</td></tr>
+          <tr><td>Intervals</td><td><span class="sets-badge">5:30–5:45</span></td><td>Hard — can barely speak, sustainable for ~5 min</td><td>Wed interval sessions (reps of 1–2 km)</td></tr>
+          <tr><td>Race pace target</td><td><span class="sets-badge">5:55–6:10</span></td><td>Hard but controlled — should feel tough but doable</td><td>Race day July 12 — target sub-2:10</td></tr>
+        </table>
+      </div>
+      <div class="grid-2" style="margin-top:20px">
+        <div class="tip-card">
+          <div class="tip-icon">🌡️</div>
+          <div class="tip-title">Run by Effort, Not Pace</div>
+          <div class="tip-text">Hot days, hills, or tired legs? Slow down and protect the effort level. The training adaptation comes from the effort, not the number on your watch.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-icon">💧</div>
+          <div class="tip-title">Fuelling on Long Runs</div>
+          <div class="tip-text">Runs over 75 min need fuel. Take water and consider a gel or banana at 45–60 min. Practice your race-day nutrition in training.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-icon">📉</div>
+          <div class="tip-title">Trust the Taper</div>
+          <div class="tip-text">Weeks 10–11 you'll feel like you're losing fitness. You're not — your muscles are repairing and glycogen is topping up. Don't add extra runs.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-icon">🦵</div>
+          <div class="tip-title">Strength + Running</div>
+          <div class="tip-text">The WaterRower and strength work make you a more resilient runner. Strong glutes and core reduce injury risk and improve running economy.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STRENGTH ════ -->
+<div id="sec-strength" class="section">
+  <div class="page-header">
+    <div class="page-title">Strength Training</div>
+    <div class="page-subtitle">Two sessions/week — Push/Core Tuesday, Pull/Core Thursday. Minimal equipment needed.</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('strength','a',this)">Session A — Push</div>
+      <div class="tab" onclick="switchTab('strength','b',this)">Session B — Pull</div>
+      <div class="tab" onclick="switchTab('strength','notes',this)">Principles</div>
+    </div>
+  </div>
+  <div class="content">
+    <div id="strength-a" class="tab-pane active">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7"><strong style="color:var(--accent)">Session A — Push + Core</strong> · Tuesday · ~35 min · Rest 60–90 sec between sets</div>
+      <div class="workout-block">
+        <table class="workout-table">
+          <tr><th>#</th><th>Exercise</th><th>Sets × Reps</th><th>Notes</th></tr>
+          <tr><td>1</td><td>Push-ups or Dumbbell Press</td><td><span class="sets-badge">3 × 10</span></td><td>Chest focus. Elevate feet or use dumbbells when easy. Squeeze chest at top.</td></tr>
+          <tr><td>2</td><td>Dumbbell Shoulder Press</td><td><span class="sets-badge">3 × 10</span></td><td>Seated or standing. Control the descent.</td></tr>
+          <tr><td>3</td><td>Lateral Raises</td><td><span class="sets-badge">3 × 12</span></td><td>Light weight, controlled. Stop at shoulder height. Builds shoulder width.</td></tr>
+          <tr><td>4</td><td>Tricep Dips or Overhead Extension</td><td><span class="sets-badge">3 × 12</span></td><td>Dips on a chair, or hold one dumbbell behind head and extend up.</td></tr>
+          <tr><td>5</td><td>Plank</td><td><span class="sets-badge">3 × 45 sec</span></td><td>Hips level, brace hard. Don't let hips sag.</td></tr>
+          <tr><td>6</td><td>Dead Bug</td><td><span class="sets-badge">3 × 10/side</span></td><td>Lie on back, extend opposite arm/leg slowly. Core stability — great for running.</td></tr>
+        </table>
+      </div>
+    </div>
+    <div id="strength-b" class="tab-pane">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7"><strong style="color:var(--accent)">Session B — Pull + Core</strong> · Thursday · ~35 min · Rest 60–90 sec between sets</div>
+      <div class="workout-block">
+        <table class="workout-table">
+          <tr><th>#</th><th>Exercise</th><th>Sets × Reps</th><th>Notes</th></tr>
+          <tr><td>1</td><td>Bent-over Dumbbell Row</td><td><span class="sets-badge">3 × 10</span></td><td>Hinge at hips, back flat. Pull elbows back and up. Best exercise for back thickness.</td></tr>
+          <tr><td>2</td><td>Reverse Flies / Face Pulls (band)</td><td><span class="sets-badge">3 × 12</span></td><td>Rear delts + upper back. Squeeze shoulder blades together at top.</td></tr>
+          <tr><td>3</td><td>Dumbbell Bicep Curls</td><td><span class="sets-badge">3 × 12</span></td><td>2 sec up, 3 sec down. Don't swing.</td></tr>
+          <tr><td>4</td><td>Superman Holds</td><td><span class="sets-badge">3 × 12</span></td><td>Lie face down, raise chest + legs. Hold 2 sec. Builds lower back — essential for running posture.</td></tr>
+          <tr><td>5</td><td>Leg Raises</td><td><span class="sets-badge">3 × 12</span></td><td>Lie flat, raise legs to 90°, lower slowly without touching floor. Targets lower abs.</td></tr>
+          <tr><td>6</td><td>Russian Twists</td><td><span class="sets-badge">3 × 16</span></td><td>Seated, feet off floor, rotate side to side. Works obliques — helps slim the waistline.</td></tr>
+        </table>
+      </div>
+    </div>
+    <div id="strength-notes" class="tab-pane">
+      <div class="tip-grid" style="margin-bottom:24px">
+        <div class="tip-card"><div class="tip-icon">📈</div><div class="tip-title">Progressive Overload</div><div class="tip-text">Every 1–2 weeks, either add 1–2 reps per set OR add a little weight. Without this you maintain — you don't grow.</div></div>
+        <div class="tip-card"><div class="tip-icon">🔄</div><div class="tip-title">Full Range of Motion</div><div class="tip-text">Full reps with lighter weight beat half reps with heavier weight every time. Ego off.</div></div>
+        <div class="tip-card"><div class="tip-icon">⏱️</div><div class="tip-title">Tempo Matters</div><div class="tip-text">2 sec up, 3 sec down. The slow lowering phase builds more muscle than rushing.</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Equipment you need (minimum)</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.9">
+          ▸ Adjustable dumbbells (or 2–3 fixed pairs: light / medium / heavy)<br>
+          ▸ Resistance band for face pulls<br>
+          ▸ A mat for floor work<br>
+          ▸ A sturdy chair for dips<br>
+          ▸ Your WaterRower ✓
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ NUTRITION ════ -->
+<div id="sec-nutrition" class="section">
+  <div class="page-header">
+    <div class="page-title">Nutrition Plan</div>
+    <div class="page-subtitle">1.80m · 92kg · Active · Fat loss + muscle · ~2,450 kcal/day</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('nutrition','meals',this)">Daily Meals</div>
+      <div class="tab" onclick="switchTab('nutrition','ideas',this)">✨ Meal Ideas</div>
+      <div class="tab" onclick="switchTab('nutrition','foods',this)">Food List</div>
+      <div class="tab" onclick="switchTab('nutrition','rules',this)">Key Rules</div>
+    </div>
+  </div>
+  <div class="content">
+    <div id="nutrition-meals" class="tab-pane active">
+      <div class="meal-card">
+        <div class="meal-time">07:00 — Breakfast (Run days: Sat / Sun / Wed)</div>
+        <div class="meal-title">Oats + Eggs + Fruit</div>
+        <div class="meal-desc">80g rolled oats · 2–3 scrambled eggs · 1 banana or berries · Black coffee</div>
+        <div class="meal-macros"><span class="meal-macro mm-kcal">~600 kcal</span><span class="meal-macro mm-pro">30g protein</span><span class="meal-macro mm-carb">75g carbs</span><span class="meal-macro mm-fat">14g fat</span></div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-time">07:00 — Breakfast (Strength / Rest days: Mon / Tue / Thu / Fri)</div>
+        <div class="meal-title">Greek Yogurt Bowl</div>
+        <div class="meal-desc">250g Greek yogurt (full fat) · 30g mixed nuts or granola · 1 tbsp honey · Berries · Black coffee</div>
+        <div class="meal-macros"><span class="meal-macro mm-kcal">~480 kcal</span><span class="meal-macro mm-pro">28g protein</span><span class="meal-macro mm-carb">35g carbs</span><span class="meal-macro mm-fat">22g fat</span></div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-time">12:30 — Lunch</div>
+        <div class="meal-title">Protein + Carb + Vegetables</div>
+        <div class="meal-desc">180–200g chicken / salmon / tofu · 150g cooked rice or sweet potato · Large greens (spinach, broccoli) · Olive oil + lemon dressing</div>
+        <div class="meal-macros"><span class="meal-macro mm-kcal">~650 kcal</span><span class="meal-macro mm-pro">45g protein</span><span class="meal-macro mm-carb">60g carbs</span><span class="meal-macro mm-fat">18g fat</span></div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-time">16:00 — Post-workout Snack (Training days)</div>
+        <div class="meal-title">Protein Shake or Cottage Cheese</div>
+        <div class="meal-desc">1 scoop whey protein in milk · OR 200g cottage cheese · Optional: 1 banana or apple</div>
+        <div class="meal-macros"><span class="meal-macro mm-kcal">~300 kcal</span><span class="meal-macro mm-pro">32g protein</span><span class="meal-macro mm-carb">22g carbs</span><span class="meal-macro mm-fat">6g fat</span></div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-time">19:30 — Dinner</div>
+        <div class="meal-title">Lean Protein + Vegetables</div>
+        <div class="meal-desc">200g lean beef / turkey / fish / eggs · Roasted vegetables · 100g cooked rice or quinoa (skip carbs on rest days) · Olive oil</div>
+        <div class="meal-macros"><span class="meal-macro mm-kcal">~600 kcal</span><span class="meal-macro mm-pro">45g protein</span><span class="meal-macro mm-carb">40g carbs</span><span class="meal-macro mm-fat">22g fat</span></div>
+      </div>
+      <div style="background:rgba(232,213,160,0.06);border:1px solid rgba(232,213,160,0.2);border-radius:var(--r);padding:16px;font-size:13px;color:var(--text2);line-height:1.8">
+        <strong style="color:var(--accent)">Daily Total: ~2,400–2,500 kcal · ~160–180g protein · ~230–250g carbs · ~80–90g fat</strong><br>
+        On long run Sundays add 200–300 kcal carbs. Drink 2.5–3L water daily + extra 500ml per hour of exercise.
+      </div>
+    </div>
+
+    <!-- AI MEAL IDEAS -->
+    <div id="nutrition-ideas" class="tab-pane">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7">Pick your meal, day type, and vibe — and get a full tailored recipe with macros matched to your 2,450 kcal / 160g protein targets.</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="mi-grid">
+          <div><div class="mi-lbl">Meal</div>
+            <select id="mi-meal" class="mi-select">
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch" selected>Lunch</option>
+              <option value="dinner">Dinner</option>
+              <option value="post-workout snack">Post-workout snack</option>
+              <option value="pre-run meal">Pre-run meal</option>
+            </select>
+          </div>
+          <div><div class="mi-lbl">Day Type</div>
+            <select id="mi-day" class="mi-select">
+              <option value="run day">Run day (Wed/Sat/Sun)</option>
+              <option value="strength day">Strength day (Tue/Thu)</option>
+              <option value="aikido day">Aikido day (Mon)</option>
+              <option value="rest day">Rest day (Fri)</option>
+            </select>
+          </div>
+          <div><div class="mi-lbl">Vibe</div>
+            <select id="mi-vibe" class="mi-select">
+              <option value="quick and easy under 15 minutes">Quick &lt;15 min</option>
+              <option value="hearty and filling">Hearty &amp; filling</option>
+              <option value="light">Light</option>
+              <option value="meal prep friendly">Meal prep</option>
+              <option value="maximum protein">Max protein</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div class="mi-lbl">Preferences / what you have at home (optional)</div>
+          <input id="mi-prefs" type="text" class="mi-input" placeholder="e.g. chicken and eggs at home, no fish, something warm...">
+        </div>
+        <button class="btn-generate" id="mi-btn" onclick="generateMeal()">✨ Generate Meal Idea</button>
+      </div>
+      <div id="mi-result"></div>
+      <div id="mi-saved-wrap" style="display:none">
+        <div class="section-heading" style="margin-top:28px">Saved Ideas</div>
+        <div class="card" id="mi-saved-list"></div>
+      </div>
+    </div>
+
+    <div id="nutrition-foods" class="tab-pane">
+      <div class="food-cols">
+        <div>
+          <div class="section-heading">✅ Prioritise These</div>
+          <ul class="food-list">
+            <li>Chicken breast / thighs</li><li>Salmon &amp; oily fish</li><li>Eggs (whole)</li>
+            <li>Greek yogurt (full fat)</li><li>Cottage cheese</li><li>Whey protein</li>
+            <li>Oats (rolled)</li><li>Sweet potato</li><li>Brown rice / quinoa</li>
+            <li>Broccoli, spinach, kale</li><li>Berries (all kinds)</li><li>Banana (pre-workout)</li>
+            <li>Olive oil</li><li>Avocado</li><li>Almonds / walnuts</li>
+            <li>Sourdough (occasional)</li><li>Legumes (lentils, chickpeas)</li>
+          </ul>
+        </div>
+        <div>
+          <div class="section-heading">❌ Limit / Avoid</div>
+          <ul class="food-list">
+            <li>Sugary drinks (incl. juice)</li><li>Alcohol</li><li>Ultra-processed snacks</li>
+            <li>White bread as a staple</li><li>Fast food</li><li>Sugary breakfast cereal</li>
+            <li>Flavoured yogurt</li><li>Seed / vegetable oils</li>
+            <li>Crisps / chips</li><li>Ready meals</li><li>Sauces with hidden sugar</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="nutrition-rules" class="tab-pane">
+      <div class="tip-grid" style="margin-bottom:20px">
+        <div class="tip-card"><div class="tip-icon">🥩</div><div class="tip-title">Protein is King</div><div class="tip-text">Hit 160g protein every day — even rest days. This is the #1 factor in retaining muscle while losing fat.</div></div>
+        <div class="tip-card"><div class="tip-icon">🍚</div><div class="tip-title">Time Your Carbs</div><div class="tip-text">Eat the bulk of your carbs before and after training. Carbs are fuel, not the enemy — but timing matters.</div></div>
+        <div class="tip-card"><div class="tip-icon">🚫</div><div class="tip-title">Cut Liquid Calories</div><div class="tip-text">Beer, wine, juice, syrupy lattes — easy 300–600 kcal that don't register as food. Alcohol blocks fat burning for 24–48 hrs.</div></div>
+        <div class="tip-card"><div class="tip-icon">💧</div><div class="tip-title">Hydration</div><div class="tip-text">3L water daily. Dehydration mimics hunger and tanks performance. +500ml per hour of exercise.</div></div>
+        <div class="tip-card"><div class="tip-icon">🧠</div><div class="tip-title">The 80% Rule</div><div class="tip-text">Fat loss is 80% diet. You cannot out-run bad eating — 60 min of running burns what's in one beer and a bag of crisps.</div></div>
+        <div class="tip-card"><div class="tip-icon">📏</div><div class="tip-title">Don't Obsess</div><div class="tip-text">Nail protein and eat mostly whole foods and the calories largely take care of themselves. Track loosely for 2–3 weeks, then go by feel.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PROGRESS ════ -->
+<div id="sec-progress" class="section">
+  <div class="page-header">
+    <div class="page-title">Progress Tracker</div>
+    <div class="page-subtitle">Log your weight weekly. Aim for 0.5–0.8 kg loss per week.</div>
+    <div style="height:16px"></div>
+  </div>
+  <div class="content">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Log Weight</div>
+        <div class="weight-input-row" style="margin-top:12px">
+          <input type="number" id="weight-input" placeholder="e.g. 91.5" step="0.1" min="50" max="200" style="width:110px">
+          <input type="date" id="weight-date" style="width:150px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r);padding:10px 14px;font-size:14px;font-family:'Barlow',sans-serif">
+          <button class="btn btn-sm" onclick="logWeight()">Log</button>
+        </div>
+        <div style="font-size:12px;color:var(--text3)">Morning, before food, after toilet — same conditions every time.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Current Stats</div>
+        <div style="margin-top:4px">
+          <div class="mini-stat" style="margin-bottom:10px"><span style="font-size:13px;color:var(--text2)">Start weight</span><span style="font-family:'Barlow Condensed';font-size:22px;font-weight:700;color:var(--accent)">92.0 kg</span></div>
+          <div class="mini-stat" style="margin-bottom:10px"><span style="font-size:13px;color:var(--text2)">Current weight</span><span id="current-weight" style="font-family:'Barlow Condensed';font-size:22px;font-weight:700;color:var(--green)">— kg</span></div>
+          <div class="mini-stat"><span style="font-size:13px;color:var(--text2)">Total lost</span><span id="total-lost" style="font-family:'Barlow Condensed';font-size:22px;font-weight:700;color:var(--green)">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title" style="margin-bottom:12px">Weight Over Time</div>
+      <div class="chart-wrap"><canvas id="weight-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px">Weight Log</div>
+      <ul class="weight-log" id="weight-log-list"><li style="color:var(--text3);font-size:13px;justify-content:center">No entries yet. Log your first weigh-in above.</li></ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── NAV ──
+function showSection(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── TABS ──
+function switchTab(section, pane, el) {
+  const sec = document.getElementById('sec-' + section);
+  sec.querySelectorAll('.tab-pane').forEach(p => { p.classList.remove('active'); p.style.display=''; });
+  sec.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const target = document.getElementById(section + '-' + pane);
+  target.classList.add('active');
+  el.classList.add('active');
+}
+
+// ── COUNTDOWN ──
+(function() {
+  const race = new Date('2026-07-12');
+  const diff = Math.ceil((race - new Date()) / 864e5);
+  const v = diff > 0 ? diff + ' days' : '🏅';
+  const el1 = document.getElementById('ov-countdown');
+  const el2 = document.getElementById('sb-countdown');
+  if (el1) el1.textContent = v;
+  if (el2) el2.textContent = diff > 0 ? diff : '🏅';
+})();
+
+// ── WEIGHT TRACKER ──
+const START_WEIGHT = 92.0;
+let weightLog = [];
+try { weightLog = JSON.parse(localStorage.getItem('fitplan-weights') || '[]'); } catch(e){}
+let chart;
+
+function logWeight() {
+  const val = parseFloat(document.getElementById('weight-input').value);
+  const date = document.getElementById('weight-date').value;
+  if (!val || val < 40 || val > 250) { alert('Enter a valid weight (kg)'); return; }
+  if (!date) { alert('Pick a date'); return; }
+  weightLog = weightLog.filter(e => e.date !== date);
+  weightLog.push({ date, weight: val });
+  weightLog.sort((a, b) => a.date.localeCompare(b.date));
+  try { localStorage.setItem('fitplan-weights', JSON.stringify(weightLog)); } catch(e){}
+  renderWeight();
+  document.getElementById('weight-input').value = '';
+}
+
+function renderWeight() {
+  if (!weightLog.length) return;
+  const sorted = [...weightLog];
+  const latest = sorted[sorted.length - 1];
+  const totalLost = START_WEIGHT - latest.weight;
+  document.getElementById('current-weight').textContent = latest.weight.toFixed(1) + ' kg';
+  const lostEl = document.getElementById('total-lost');
+  if (totalLost > 0) { lostEl.textContent = '−' + totalLost.toFixed(1) + ' kg'; lostEl.style.color = 'var(--green)'; }
+  else if (totalLost < 0) { lostEl.textContent = '+' + Math.abs(totalLost).toFixed(1) + ' kg'; lostEl.style.color = 'var(--red)'; }
+  else { lostEl.textContent = '0.0 kg'; lostEl.style.color = 'var(--text2)'; }
+  // Log list
+  document.getElementById('weight-log-list').innerHTML = sorted.slice().reverse().map((e, i, arr) => {
+    const prev = arr[i + 1];
+    let diffStr = '';
+    if (prev) {
+      const d = e.weight - prev.weight;
+      diffStr = d > 0 ? `<span class="wdiff-pos">+${d.toFixed(1)} kg</span>`
+                : d < 0 ? `<span class="wdiff-neg">${d.toFixed(1)} kg</span>`
+                : `<span class="wdiff-zero">—</span>`;
+    }
+    const col = e.weight < START_WEIGHT ? 'var(--green)' : e.weight > START_WEIGHT ? 'var(--red)' : 'var(--text)';
+    return `<li><span class="wdate">${e.date}</span><div style="display:flex;align-items:center;gap:10px"><span class="wval" style="color:${col}">${e.weight.toFixed(1)} kg</span>${diffStr}</div></li>`;
+  }).join('');
+  // Chart
+  const labels = sorted.map(e => e.date);
+  const data = sorted.map(e => e.weight);
+  const ctx = document.getElementById('weight-chart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Weight (kg)', data, borderColor: '#c4a84f', backgroundColor: 'rgba(196,168,79,0.08)', pointBackgroundColor: '#c4a84f', pointRadius: 4, tension: 0.3, fill: true },
+        { label: 'Start (92 kg)', data: labels.map(() => 92), borderColor: 'rgba(255,255,255,0.15)', borderDash: [4,4], pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#888', font: { family: 'Barlow', size: 12 } } } },
+      scales: {
+        x: { ticks: { color: '#555', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#555', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' }, suggestedMin: 80, suggestedMax: 94 }
+      }
+    }
+  });
+}
+
+document.getElementById('weight-date').value = new Date().toISOString().split('T')[0];
+renderWeight();
+
+// ── AI MEAL IDEAS ──
+let savedMeals = [];
+try { savedMeals = JSON.parse(localStorage.getItem('fitplan-meals-v2') || '[]'); } catch(e){}
+let _lastMeal = null;
+
+const mealTargets = {
+  'breakfast': '500-650 kcal, 28-35g protein',
+  'lunch': '600-700 kcal, 40-50g protein',
+  'dinner': '550-650 kcal, 40-50g protein',
+  'post-workout snack': '200-350 kcal, 28-35g protein',
+  'pre-run meal': '350-500 kcal, 20-30g protein, emphasise carbs'
+};
+
+async function generateMeal() {
+  const meal = document.getElementById('mi-meal').value;
+  const day  = document.getElementById('mi-day').value;
+  const vibe = document.getElementById('mi-vibe').value;
+  const prefs = document.getElementById('mi-prefs').value.trim();
+  const btn = document.getElementById('mi-btn');
+  const res = document.getElementById('mi-result');
+  const target = mealTargets[meal] || '500-650 kcal, 35g protein';
+  btn.disabled = true; btn.textContent = '⏳ Generating…';
+  res.innerHTML = `<div class="card" style="text-align:center;padding:32px;color:var(--text3);font-size:13px">Crafting your meal idea…</div>`;
+  const prompt = `You are a sports nutritionist for a 92kg/1.80m male: half marathon training 3x/week, strength 2x/week, aikido Mondays, WaterRower. Goal: lose fat + build muscle. Daily: 2450 kcal, 160g protein, 240g carbs, 94g fat.\n\nGenerate ONE specific ${meal} for a ${day} (${vibe}). Target: ${target}.${prefs ? '\nPreferences: ' + prefs : ''}\n\nRespond ONLY with raw JSON, no markdown fences:\n{"name":"","tagline":"","why":"one sentence why this suits a ${day}","prepTime":"","ingredients":[{"amount":"","item":""}],"steps":[""],"macros":{"kcal":0,"protein":0,"carbs":0,"fat":0},"tip":""}`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await r.json();
+    const raw = (data.content || []).find(b => b.type === 'text')?.text || '';
+    const m = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    _lastMeal = { m, meal, day, vibe, ts: new Date().toLocaleDateString('de-CH') };
+    renderMealResult(m);
+  } catch(e) {
+    res.innerHTML = `<div class="card" style="padding:20px;color:var(--red);font-size:13px">⚠️ Could not generate a meal idea. Please try again.</div>`;
+  }
+  btn.disabled = false; btn.textContent = '✨ Generate Meal Idea';
+}
+
+function renderMealResult(m) {
+  const id = Date.now();
+  document.getElementById('mi-result').innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <div>
+          <div style="font-family:'Barlow Condensed';font-size:26px;font-weight:700;color:var(--accent);letter-spacing:0.02em">${m.name}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:3px">${m.tagline}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <span style="font-size:11px;background:var(--surface2);color:var(--text3);padding:4px 10px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">⏱ ${m.prepTime}</span>
+          <button onclick="saveMealIdea()" style="background:var(--accent2);color:#0e0e0e;border:none;padding:5px 14px;border-radius:4px;font-family:'Barlow Condensed';font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer" id="save-btn-${id}">Save</button>
+        </div>
+      </div>
+      <div class="mi-why">💡 ${m.why}</div>
+      <div class="mi-stat-row">
+        <div class="mi-stat"><div class="mi-stat-num" style="color:var(--accent)">${m.macros.kcal}</div><div class="mi-stat-lbl">kcal</div></div>
+        <div class="mi-stat"><div class="mi-stat-num" style="color:var(--blue)">${m.macros.protein}g</div><div class="mi-stat-lbl">protein</div></div>
+        <div class="mi-stat"><div class="mi-stat-num" style="color:var(--green)">${m.macros.carbs}g</div><div class="mi-stat-lbl">carbs</div></div>
+        <div class="mi-stat"><div class="mi-stat-num" style="color:var(--orange)">${m.macros.fat}g</div><div class="mi-stat-lbl">fat</div></div>
+      </div>
+      <div class="mi-col2">
+        <div>
+          <div class="mi-sub">Ingredients</div>
+          ${m.ingredients.map(i => `<div class="mi-ing-row"><span class="mi-ing-amt">${i.amount}</span><span style="color:var(--text2)">${i.item}</span></div>`).join('')}
+        </div>
+        <div>
+          <div class="mi-sub">Method</div>
+          ${m.steps.map((s, i) => `<div class="mi-step-row"><span class="mi-step-num">${i+1}</span><span style="color:var(--text2)">${s}</span></div>`).join('')}
+        </div>
+      </div>
+      ${m.tip ? `<div class="mi-tip">🔪 <strong>Tip:</strong> ${m.tip}</div>` : ''}
+    </div>`;
+}
+
+function saveMealIdea() {
+  if (!_lastMeal) return;
+  savedMeals.unshift({ id: Date.now(), ..._lastMeal });
+  if (savedMeals.length > 25) savedMeals.pop();
+  try { localStorage.setItem('fitplan-meals-v2', JSON.stringify(savedMeals)); } catch(e){}
+  renderSavedMeals();
+}
+
+function renderSavedMeals() {
+  if (!savedMeals.length) { document.getElementById('mi-saved-wrap').style.display = 'none'; return; }
+  document.getElementById('mi-saved-wrap').style.display = 'block';
+  document.getElementById('mi-saved-list').innerHTML = savedMeals.map((e, i) => `
+    <div class="mi-saved-row" onclick="loadSaved(${i})">
+      <div><span>${e.m.name}</span><span style="font-size:12px;color:var(--text3);margin-left:8px">${e.meal} · ${e.ts}</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="meal-macro mm-kcal">${e.m.macros.kcal} kcal</span>
+        <span class="meal-macro mm-pro">${e.m.macros.protein}g P</span>
+        <button class="mi-del-btn" onclick="event.stopPropagation();delSaved(${i})">×</button>
+      </div>
+    </div>`).join('');
+}
+
+function loadSaved(i) {
+  _lastMeal = savedMeals[i];
+  renderMealResult(savedMeals[i].m);
+  document.getElementById('mi-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function delSaved(i) {
+  savedMeals.splice(i, 1);
+  try { localStorage.setItem('fitplan-meals-v2', JSON.stringify(savedMeals)); } catch(e){}
+  renderSavedMeals();
+}
+
+renderSavedMeals();
+</script>
+</body>
+</html>
